@@ -45,19 +45,6 @@ export default function RootLayout({
         />
       </head>
       <body>
-        {/* Skip links for accessibility */}
-        <div className="skip-links">
-          <a href="#main-content" className="skip-link">
-            Skip to main content
-          </a>
-          <a href="#pattern-canvas" className="skip-link">
-            Skip to pattern canvas
-          </a>
-          <a href="#emoji-palettes" className="skip-link">
-            Skip to emoji palettes
-          </a>
-        </div>
-
         {/* ARIA live regions for announcements */}
         <div
           id="aria-live-announcer"

@@ -9,7 +9,7 @@ export const EMOJI_PALETTES: EmojiPalette[] = [
     id: 'hearts-flowers',
     name: { en: 'Hearts & Flowers', fr: 'Cœurs & Fleurs' },
     category: PaletteCategory.COLOR,
-    emojis: ['❤️', '💕', '💖', '💗', '💝', '🌸', '🌺', '🌻', '🌷', '🌹', '💐', '🌼'],
+    emojis: ['❤️', '💕', '💖', '💗', '💝', '🌸', '🌺', '🌻', '🌷', '🌹', '💐', '🌼', '🥀', '🌵', '🪴', '💒', '🏩', '💞', '💘', '💌', '🎀'],
     orderIndex: 1,
     isCustom: false,
     description: { en: 'Romantic hearts and beautiful flowers', fr: 'Cœurs romantiques et belles fleurs' },

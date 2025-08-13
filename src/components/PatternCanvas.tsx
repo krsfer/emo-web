@@ -22,13 +22,33 @@ const PatternCanvas: React.FC<PatternCanvasProps> = ({
   animationEnabled = true
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [accessibilityInfo, setAccessibilityInfo] = useState<PatternAccessibilityInfo>();
   const [isLoading, setIsLoading] = useState(false);
+  const [containerSize, setContainerSize] = useState(300);
 
-  // Calculate canvas dimensions
-  const canvasSize = pattern.length > 0 ? pattern.length * cellSize : cellSize;
+  // Update container size when component mounts or resizes
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const size = Math.min(rect.width, rect.height) || 300;
+        setContainerSize(size);
+      }
+    };
+
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
+  // Calculate canvas dimensions based on container
   const padding = 10;
-  const totalSize = canvasSize + (padding * 2);
+  const availableSize = containerSize - (padding * 2);
+  const gridCells = pattern.length > 0 ? pattern.length : 8;
+  const dynamicCellSize = availableSize / gridCells;
+  const canvasSize = availableSize;
+  const totalSize = containerSize;
 
   // Check for reduced motion preference
   const prefersReducedMotion = typeof window !== 'undefined' && 
@@ -55,8 +75,9 @@ const PatternCanvas: React.FC<PatternCanvasProps> = ({
 
     // Set high DPI scaling
     const dpr = window.devicePixelRatio || 1;
-    canvas.style.width = `${totalSize}px`;
-    canvas.style.height = `${totalSize}px`;
+    // Set display size to fill container
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
     canvas.width = totalSize * dpr;
     canvas.height = totalSize * dpr;
     ctx.scale(dpr, dpr);
@@ -71,7 +92,28 @@ const PatternCanvas: React.FC<PatternCanvasProps> = ({
       ctx.lineWidth = 1;
       
       for (let i = 0; i <= pattern.length; i++) {
-        const pos = padding + (i * cellSize);
+        const pos = padding + (i * dynamicCellSize);
+        // Vertical lines
+        ctx.beginPath();
+        ctx.moveTo(pos, padding);
+        ctx.lineTo(pos, padding + canvasSize);
+        ctx.stroke();
+        
+        // Horizontal lines
+        ctx.beginPath();
+        ctx.moveTo(padding, pos);
+        ctx.lineTo(padding + canvasSize, pos);
+        ctx.stroke();
+      }
+    } else {
+      // Draw a subtle grid for empty canvas
+      ctx.strokeStyle = '#f8f8f8';
+      ctx.lineWidth = 1;
+      const gridSize = 8; // 8x8 grid for empty canvas
+      const gridCellSize = canvasSize / gridSize;
+      
+      for (let i = 0; i <= gridSize; i++) {
+        const pos = padding + (i * gridCellSize);
         // Vertical lines
         ctx.beginPath();
         ctx.moveTo(pos, padding);
@@ -88,7 +130,7 @@ const PatternCanvas: React.FC<PatternCanvasProps> = ({
 
     // Draw pattern emojis
     if (pattern.length > 0) {
-      ctx.font = `${cellSize * 0.6}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+      ctx.font = `${dynamicCellSize * 0.6}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
@@ -96,17 +138,17 @@ const PatternCanvas: React.FC<PatternCanvasProps> = ({
         for (let col = 0; col < pattern[row].length; col++) {
           const cell = pattern[row][col];
           if (cell.emoji) {
-            const x = padding + (col * cellSize) + (cellSize / 2);
-            const y = padding + (row * cellSize) + (cellSize / 2);
+            const x = padding + (col * dynamicCellSize) + (dynamicCellSize / 2);
+            const y = padding + (row * dynamicCellSize) + (dynamicCellSize / 2);
 
             // Highlight center cell with subtle purple background
             if (cell.isCenter) {
               ctx.fillStyle = 'rgba(123, 97, 255, 0.1)';
               ctx.fillRect(
-                padding + (col * cellSize) + 2,
-                padding + (row * cellSize) + 2,
-                cellSize - 4,
-                cellSize - 4
+                padding + (col * dynamicCellSize) + 2,
+                padding + (row * dynamicCellSize) + 2,
+                dynamicCellSize - 4,
+                dynamicCellSize - 4
               );
             }
 
@@ -122,7 +164,7 @@ const PatternCanvas: React.FC<PatternCanvasProps> = ({
     const accessInfo = PatternGenerator.generatePatternAltText(pattern);
     setAccessibilityInfo(accessInfo);
     setIsLoading(false);
-  }, [pattern, cellSize, totalSize, canvasSize, padding]);
+  }, [pattern, dynamicCellSize, totalSize, canvasSize, padding]);
 
   /**
    * Handles canvas click events
@@ -138,14 +180,14 @@ const PatternCanvas: React.FC<PatternCanvasProps> = ({
     const y = event.clientY - rect.top - padding;
 
     // Calculate grid cell
-    const col = Math.floor(x / cellSize);
-    const row = Math.floor(y / cellSize);
+    const col = Math.floor(x / dynamicCellSize);
+    const row = Math.floor(y / dynamicCellSize);
 
     // Validate bounds
     if (row >= 0 && row < pattern.length && col >= 0 && col < pattern[0].length) {
       onCellClick(row, col);
     }
-  }, [readonly, onCellClick, pattern, cellSize, padding]);
+  }, [readonly, onCellClick, pattern, dynamicCellSize, padding]);
 
   /**
    * Handles keyboard navigation
@@ -162,16 +204,16 @@ const PatternCanvas: React.FC<PatternCanvasProps> = ({
     }
   }, [readonly, onCellClick, pattern]);
 
-  // Re-render when pattern changes
+  // Re-render when pattern changes or container size changes
   useEffect(() => {
     renderPattern();
-  }, [renderPattern]);
+  }, [renderPattern, containerSize]);
 
   // Generate CSS animation class
   const animationClass = animationEnabled && !prefersReducedMotion ? 'pattern-canvas-animated' : '';
 
   return (
-    <div className={`pattern-canvas-container ${className}`}>
+    <div ref={containerRef} className={`pattern-canvas-container ${className}`}>
       {isLoading && (
         <div className="pattern-loading" aria-live="polite">
           Loading pattern...
@@ -189,10 +231,7 @@ const PatternCanvas: React.FC<PatternCanvasProps> = ({
         tabIndex={readonly ? -1 : 0}
         style={{
           borderRadius: '16px',
-          cursor: readonly ? 'default' : 'pointer',
-          maxWidth: '100%',
-          height: 'auto',
-          display: 'block'
+          cursor: readonly ? 'default' : 'pointer'
         }}
       />
 

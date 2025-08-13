@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import PatternCanvas from '@/components/PatternCanvas';
 import EmojiPaletteCarousel from '@/components/EmojiPaletteCarousel';
+import SequenceEditor from '@/components/SequenceEditor';
 import { PatternGenerator } from '@/lib/utils/pattern-generator';
 import { EMOJI_PALETTES, getDefaultPalette } from '@/lib/constants/emoji-palettes';
 import { PatternState, GridCell, PatternMode } from '@/types/pattern';
@@ -99,6 +100,35 @@ export default function HomePage() {
   }, [undoStack, patternState]);
 
   /**
+   * Handles sequence changes from the sequence editor
+   */
+  const handleSequenceChange = useCallback((newSequence: string[]) => {
+    setUndoStack(prev => [...prev, patternState]);
+    setRedoStack([]);
+    setPatternState(PatternGenerator.createPatternState(newSequence, patternState.patternMode));
+  }, [patternState]);
+
+  /**
+   * Handles insertion index changes from the sequence editor
+   */
+  const handleInsertionIndexChange = useCallback((newIndex: number) => {
+    setPatternState(prev => ({ ...prev, insertionIndex: newIndex }));
+  }, []);
+
+  /**
+   * Handles emoji removal from sequence editor
+   */
+  const handleEmojiRemove = useCallback((index: number) => {
+    setUndoStack(prev => [...prev, patternState]);
+    setRedoStack([]);
+    setPatternState(prev => {
+      const newSequence = [...prev.sequence];
+      newSequence.splice(index, 1);
+      return PatternGenerator.createPatternState(newSequence, prev.patternMode);
+    });
+  }, [patternState]);
+
+  /**
    * Redo last undone action
    */
   const handleRedo = useCallback(() => {
@@ -155,14 +185,14 @@ export default function HomePage() {
             aria-label={`Switch to ${language === 'en' ? 'French' : 'English'}`}
             type="button"
           >
-            {language === 'en' ? '🇬🇧' : '🇫🇷'}
+            🇬🇧
           </button>
           <button 
             className="nav-button"
-            aria-label="Search patterns"
+            aria-label="Translate"
             type="button"
           >
-            🔍
+            🌐
           </button>
           <button 
             className="nav-button"
@@ -172,26 +202,39 @@ export default function HomePage() {
             ☰
           </button>
         </div>
+        
+        <div className="nav-center">
+          <div className="brand-logo">
+            emoty
+          </div>
+        </div>
+        
         <div className="nav-right">
+          <button 
+            className="nav-button"
+            aria-label="Sports"
+            type="button"
+          >
+            🏀
+          </button>
           <button 
             className="nav-button"
             aria-label="Favorites"
             type="button"
           >
-            🧡
+            ⭐
           </button>
           <button 
             className="nav-button"
-            onClick={handleAIGenerate}
-            aria-label="Generate AI pattern"
+            aria-label="Starred"
             type="button"
           >
-            ✨
+            ⭐
           </button>
           <button 
             className="nav-button"
             onClick={handleClearPattern}
-            aria-label="Clear pattern"
+            aria-label="Close"
             disabled={patternState.sequence.length === 0}
             type="button"
           >
@@ -204,21 +247,20 @@ export default function HomePage() {
       <div className="main-content">
         <div className="canvas-section">
           <div className="canvas-wrapper">
-            {patternState.sequence.length === 0 ? (
-              <div className="empty-canvas">
+            <PatternCanvas
+              pattern={currentPattern}
+              onCellClick={handleCanvasClick}
+              readonly={false}
+              cellSize={30}
+              animationEnabled={true}
+            />
+            {patternState.sequence.length === 0 && (
+              <div className="empty-canvas-overlay">
                 <div className="empty-canvas-icon">🎨</div>
                 <div className="empty-canvas-text">
                   Select emojis from below to create your pattern
                 </div>
               </div>
-            ) : (
-              <PatternCanvas
-                pattern={currentPattern}
-                onCellClick={handleCanvasClick}
-                readonly={false}
-                cellSize={30}
-                animationEnabled={true}
-              />
             )}
           </div>
         </div>
@@ -234,6 +276,18 @@ export default function HomePage() {
             onPaletteChange={setActivePalette}
             onEmojiSelect={handleEmojiSelect}
             selectedEmoji={selectedEmoji}
+            language={language}
+          />
+        </div>
+
+        {/* Sequence Editor */}
+        <div className="sequence-editor-section">
+          <SequenceEditor
+            sequence={patternState.sequence}
+            insertionIndex={patternState.insertionIndex}
+            onSequenceChange={handleSequenceChange}
+            onInsertionIndexChange={handleInsertionIndexChange}
+            onEmojiRemove={handleEmojiRemove}
             language={language}
           />
         </div>
