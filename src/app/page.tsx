@@ -4,6 +4,7 @@ import React, { useState, useCallback } from 'react';
 import PatternCanvas from '@/components/PatternCanvas';
 import EmojiPaletteCarousel from '@/components/EmojiPaletteCarousel';
 import SequenceEditor from '@/components/SequenceEditor';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { PatternGenerator } from '@/lib/utils/pattern-generator';
 import { EMOJI_PALETTES, getDefaultPalette } from '@/lib/constants/emoji-palettes';
 import { PatternState, GridCell, PatternMode } from '@/types/pattern';
@@ -210,13 +211,7 @@ export default function HomePage() {
         </div>
         
         <div className="nav-right">
-          <button 
-            className="nav-button"
-            aria-label="Sports"
-            type="button"
-          >
-            🏀
-          </button>
+          <ThemeToggle />
           <button 
             className="nav-button"
             aria-label="Favorites"
@@ -226,19 +221,12 @@ export default function HomePage() {
           </button>
           <button 
             className="nav-button"
-            aria-label="Starred"
-            type="button"
-          >
-            ⭐
-          </button>
-          <button 
-            className="nav-button"
             onClick={handleClearPattern}
-            aria-label="Close"
+            aria-label="Clear pattern"
             disabled={patternState.sequence.length === 0}
             type="button"
           >
-            ❌
+            🗑️
           </button>
         </div>
       </nav>

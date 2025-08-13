@@ -17,9 +17,15 @@
       "Bash(git commit:*)",
       "Bash(kill:*)",
       "Bash(pkill:*)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "mcp__serena__list_dir",
+      "mcp__filesystem__read_text_file",
+      "mcp__filesystem__list_directory"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "defaultMode": "acceptEdits"
   }
 }

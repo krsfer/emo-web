@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './globals.css';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 export const metadata: Metadata = {
   title: 'Emoty - Emoji Pattern Creator',
@@ -59,9 +60,11 @@ export default function RootLayout({
           className="sr-only"
         />
 
-        <main id="main-content">
-          {children}
-        </main>
+        <ThemeProvider>
+          <main id="main-content">
+            {children}
+          </main>
+        </ThemeProvider>
 
         {/* Bootstrap JS for interactive components */}
         <script 
