@@ -20,8 +20,9 @@ export const ThemeToggle: React.FC = () => {
         aria-label="Theme toggle"
         type="button"
         disabled
+        style={{ minWidth: '40px', minHeight: '40px' }}
       >
-        <i className="fas fa-circle-half-stroke" aria-hidden="true" />
+        <span style={{ fontSize: '20px' }}>🌓</span>
       </button>
     );
   }
@@ -38,13 +39,13 @@ export const ThemeToggle: React.FC = () => {
   const getThemeIcon = () => {
     switch (theme) {
       case 'light':
-        return 'fas fa-sun';
+        return '☀️';
       case 'dark':
-        return 'fas fa-moon';
+        return '🌙';
       case 'system':
-        return 'fas fa-desktop';
+        return '💻';
       default:
-        return 'fas fa-sun';
+        return '☀️';
     }
   };
 
@@ -68,8 +69,11 @@ export const ThemeToggle: React.FC = () => {
       title={`Current: ${getThemeLabel()}. Click to change theme.`}
       aria-label={`Current theme: ${getThemeLabel()}. Click to cycle through themes.`}
       type="button"
+      style={{ minWidth: '40px', minHeight: '40px' }}
     >
-      <i className={getThemeIcon()} aria-hidden="true" />
+      <span style={{ fontSize: '20px' }} aria-hidden="true">
+        {getThemeIcon()}
+      </span>
       <span className="sr-only">{getThemeLabel()}</span>
     </button>
   );
