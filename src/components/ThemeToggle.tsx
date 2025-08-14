@@ -1,11 +1,32 @@
 'use client';
 
-import React from 'react';
-import { useTheme } from '@/hooks/useTheme';
+import React, { useEffect, useState, useContext } from 'react';
+import { ThemeContext } from '@/contexts/ThemeContext';
 import type { Theme } from '@/types/theme';
 
 export const ThemeToggle: React.FC = () => {
-  const { theme, setTheme, actualTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const context = useContext(ThemeContext);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  // Don't render on server to avoid hydration mismatch
+  if (!mounted || !context) {
+    return (
+      <button
+        className="nav-button theme-toggle"
+        aria-label="Theme toggle"
+        type="button"
+        disabled
+      >
+        <i className="fas fa-circle-half-stroke" aria-hidden="true" />
+      </button>
+    );
+  }
+  
+  const { theme, setTheme, actualTheme } = context;
 
   const cycleTheme = () => {
     const themes: Theme[] = ['light', 'dark', 'system'];
